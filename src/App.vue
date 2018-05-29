@@ -15,6 +15,7 @@
     </v-ons-page>
 </template>
 <script>
+import AppToolbar from './components/AppToolbar.vue'
   export default{
     data() {
       return {
