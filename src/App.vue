@@ -4,7 +4,8 @@
   <div class="content">
       <app-search :query.sync="query"></app-search>
     
-    <v-ons-list v-if="showList">
+    <v-ons-list v-if="showList && !isLoading" >
+      
       <v-ons-list-header>{{ query }}</v-ons-list-header>
         <v-ons-list-item v-for="(repo, index) in repos" :key="index">
                
@@ -17,8 +18,14 @@
   </div>
           </v-ons-list-item>
         </v-ons-list>
-      
-        
+       
+  
+     <p v-if="isLoading">
+        <!-- <v-ons-progress-circular value="20"></v-ons-progress-circular> -->
+        <!-- <v-ons-progress-circular value="40" secondary-value="80"></v-ons-progress-circular> -->
+       <v-ons-progress-circular indeterminate></v-ons-progress-circular>
+     </p>
+ 
     </div>   
     </v-ons-page>
 </template>
@@ -41,6 +48,7 @@ import { gitHub } from "./services/GitHub.js"
     },
     data() {
       return {
+        isLoading: false,
         query: '',
         repos: []
       };
@@ -48,16 +56,23 @@ import { gitHub } from "./services/GitHub.js"
   methods: {
     getRepos: debounce(function(){
       gitHub.getRepos(this.query)
-      .then(response => {this.repos=response.data})
+      .then(response => {
+        this.repos=response.data
+        this.isLoading = false
+        }).catch(()=>{
+          this.isLoading = false
+        })
       //console.log(response)
-    }, 500),
+    }, 1500),
      makeAvatarUrl(query) {
       return this.repos.length ? `https://github.com/${query}.png` : "#"
     }
+    
   },
 
  watch: {
     query: function() {
+      this.isLoading = true
       this.getRepos()
       }
     },
@@ -66,6 +81,6 @@ import { gitHub } from "./services/GitHub.js"
       return this.repos.length > 0 && this.query.length > 0
       }
     },
-   
   };
 </script>
+
